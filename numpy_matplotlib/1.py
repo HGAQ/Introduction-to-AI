@@ -129,7 +129,7 @@ if __name__ == '__main__':
     # 使用argparse模块，可以方便的获取命令行参数
     
     arg_parser = argparse.ArgumentParser()
-    arg_parser.add_argument('--task', type=str, default='task2', help='task name')
+    arg_parser.add_argument('--task', type=str, default='task1', help='task name')
     args = arg_parser.parse_args()
     
     
