@@ -150,7 +150,7 @@ class AgentState:
         state.scaredTimer = self.scaredTimer
         state.numCarrying = self.numCarrying
         state.numReturned = self.numReturned
-        return state
+        return state 
 
     def getPosition(self):
         if self.configuration == None: return None
