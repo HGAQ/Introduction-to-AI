@@ -144,7 +144,7 @@ def uniformCostSearch(problem):
             n_direction = next[1]
             if n_state not in Visited:
                 Frontier.update( (n_state, actions + [n_direction]) , problem.getCostOfActions(actions + [n_direction]))
-                Visited.append( n_state )
+                Visited.append(n_state)
 ############################################################################################
 
 def nullHeuristic(state, problem=None):
@@ -154,16 +154,41 @@ def nullHeuristic(state, problem=None):
     """
     return 0
 
+
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
+
     Frontier = util.PriorityQueue()
     Visited = []
     p0=problem.getCostOfActions([])+heuristic(problem.getStartState(), problem)
     Frontier.update( (problem.getStartState(), []), p0)
-    Visited.append( problem.getStartState() )
     while Frontier.isEmpty() == 0:
         state, actions= Frontier.pop()
+        if problem.isGoalState(state):
+            return actions 
+        if state not in Visited:
+            for next in problem.getSuccessors(state):
+                n_state = next[0]
+                n_direction = next[1]
+                if n_state not in Visited:
+                    p0=problem.getCostOfActions(actions + [n_direction])+heuristic(n_state, problem)
+                    Frontier.update( (n_state, actions + [n_direction]),p0)
+            Visited.append(state)
+                
+
+'''def aStarSearch(problem, heuristic=nullHeuristic):
+    """Search the node that has the lowest combined cost and heuristic first."""
+    "*** YOUR CODE HERE ***"
+
+    Frontier = MyPriorityQueue()
+    Visited = []
+    p0=problem.getCostOfActions([])+heuristic(problem.getStartState(), problem)
+    Frontier.update( (problem.getStartState(), []), p0)
+    while Frontier.isEmpty() == 0:
+        state, actions= Frontier.pop()[1]
+        print(state,actions,"poped")
+        Visited.append(state)
         if problem.isGoalState(state):
             return actions 
         for next in problem.getSuccessors(state):
@@ -171,11 +196,81 @@ def aStarSearch(problem, heuristic=nullHeuristic):
             n_direction = next[1]
             if n_state not in Visited:
                 p0=problem.getCostOfActions(actions + [n_direction])+heuristic(n_state, problem)
-                print(p0)
-                print(n_state)
-                Frontier.update( (n_state, actions + [n_direction]) , p0)
-                Visited.append( n_state )
+                print(p0,"hentai")
+                Frontier.update( (n_state, actions + [n_direction]),p0)
+                print(n_state,actions+[n_direction],"added")
+                
+def aStarSearch(problem, heuristic=nullHeuristic):
+    """Search the node that has the lowest combined cost and heuristic first."""
+    "*** YOUR CODE HERE ***"
 
+    Frontier = util.PriorityQueue()
+    Visited = []
+    p0=problem.getCostOfActions([])+heuristic(problem.getStartState(), problem)
+    Frontier.update( (problem.getStartState(), []), p0)
+    while Frontier.isEmpty() == 0:
+        state, actions= Frontier.pop()
+        print(state,actions,"poped")
+        if problem.isGoalState(state):
+            return actions 
+        for next in problem.getSuccessors(state):
+            n_state = next[0]
+            n_direction = next[1]
+            if n_state not in Visited:
+                p0=problem.getCostOfActions(actions + [n_direction])+heuristic(n_state, problem)
+                print(p0,"hentai")
+                Frontier.update( (n_state, actions + [n_direction]),p0)
+                print(n_state,actions+[n_direction],"added")
+                Visited.append(n_state)
+class MyPriorityQueue:
+    def  __init__(self):
+        self.heap = []
+
+    def push(self, item, priority):
+        pos=0
+        if(self.heap):
+            for i in self.heap:
+                if i[pos]<=priority:    
+                    self.heap.insert(pos,(priority, item))
+                    print(1)
+                    break
+            else:
+                self.heap.append((priority,item))
+        else:
+            self.heap.insert(pos,(priority, item))
+
+    def pop(self):
+        return self.heap.pop()
+    
+
+    def isEmpty(self):
+        print(self.heap)
+        return len(self.heap) == 0
+
+
+    def update(self, item, priority):
+        if(self.heap):
+            for i in self.heap:
+                print("stucked1")
+                if i[1][0] == item[0]:
+                    print("stucked2")
+                    if i[0] <= priority:
+                        break
+                    else:
+                        i[0]=priority
+                        i[1][1]=item[1]
+                        print(item, priority,"qweqwe")
+                        break
+            else:
+                self.push(item, priority)
+                print(item, priority,"dldldl")
+        else:
+            self.push(item, priority)
+            print(item, priority)
+                                
+                
+'''                
+    
 # Abbreviations
 bfs = breadthFirstSearch
 dfs = depthFirstSearch
