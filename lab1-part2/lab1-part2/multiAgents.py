@@ -241,7 +241,7 @@ class MCTSAgent(MultiAgentSearchAgent):
                 self.numerator = data[2]
                 self.denominator = data[3]
         
-        
+        gameState.explored.clear()
         agent_num = gameState.getNumAgents()
         
         
@@ -276,9 +276,9 @@ class MCTSAgent(MultiAgentSearchAgent):
         position_index={'North':0,'East':1,'West':2,'South':3,'Stop':4}
         
         
-        search_times=200 #搜索最多次数
-        dangerous_length=3 #危险预警
-        Depth=16 #模拟深度
+        search_times=400 #搜索最多次数
+        dangerous_length=4 #危险预警
+        Depth=6 #模拟深度
         
         #设置根节点
         data = [gameState, 0, 0, 0]
@@ -431,35 +431,42 @@ class MCTSAgent(MultiAgentSearchAgent):
         #定义final_Selection（root）函数：
         # 遍历root的子节点，计算每个子节点的比率，找出比率最大的子节点，并返回其索引位置。
         def final_Selection(root):
-          best = None
+          best = 4
           i = 0
           max_rate = -1145141919810
+          legalmoves=root.gamestate.getLegalActions(0)
+          #print("---")
           for i in range(5):
             if root.child[i] != None:
               root.child[i].numerator=root.child[i].denominator-root.child[i].numerator
-              rate = Evaluate(root.child[i])
-              if max_rate < rate:
-                best = i
-                max_rate = rate
-          return index_position[best]
+              rate = root.child[i].numerator / root.child[i].denominator
+              if index_position[i] in legalmoves:
+                if max_rate < rate:
+                  #print(root.child[i].numerator/root.child[i].denominator,index_position[i])
+                  best = i
+                  max_rate = rate
+          if 0<=best and best<=4:
+            return index_position[best]
+          else:
+            return 'Stop'
           
         def find_food(root):
           Frontier = util.Queue()
           Visited = []
           Frontier.push( (root.gamestate, []) )
-          Visited.append( root.gamestate )
+          Visited.append( root.gamestate.getPacmanPosition() )
           while Frontier.isEmpty() == 0:
               state, actions = Frontier.pop()
               legalMoves = state.getLegalActions(0)
               if state.getPacmanPosition() in can_eaten:
-                  #print 'Find Goal'
+                if 0<=position_index[actions[0]] and position_index[actions[0]]<=4:
                   return actions[0]
               for next in legalMoves:
                   n_state = state.generateSuccessor(0,next)
                   n_direction = next
-                  if n_state not in Visited:
-                      Frontier.push( (n_state, actions + [n_direction]) )
-                      Visited.append( n_state )
+                  if n_state.getPacmanPosition() not in Visited:
+                      Frontier.push((n_state, actions + [n_direction]))
+                      Visited.append(n_state.getPacmanPosition())
         
 ############################  MAIN FUNCTION  #######################################################
         if is_dangerous(dangerous_length) == 1:
