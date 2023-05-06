@@ -276,7 +276,7 @@ class MCTSAgent(MultiAgentSearchAgent):
         position_index={'North':0,'East':1,'West':2,'South':3,'Stop':4}
         
         
-        search_times=400 #搜索最多次数
+        search_times=514 #搜索最多次数
         dangerous_length=4 #危险预警
         Depth=6 #模拟深度
         
@@ -354,7 +354,7 @@ class MCTSAgent(MultiAgentSearchAgent):
             children = []
             next_agentid = (node.agentid + 1) % agent_num
             for move in legalMoves:
-              if( move == 'Stop'):
+              if( move == 'Stop' and move == None):
                 continue
               child_data = [node.gamestate.generateSuccessor(node.agentid, move), next_agentid, 0, 0]
               child_node = Node(child_data)
@@ -385,8 +385,12 @@ class MCTSAgent(MultiAgentSearchAgent):
               if len(legalMoves) == 0:
                 return 0
               else:
-                stimulate_state = stimulate_state.generateSuccessor(stimulate_agent,random.choice(legalMoves))
-                stimulate_agent = (stimulate_agent+1) % agent_num
+                move = random.choice(legalMoves)
+                if move !=None:
+                  stimulate_state = stimulate_state.generateSuccessor(stimulate_agent,move) 
+                  stimulate_agent = (stimulate_agent+1) % agent_num
+                else:
+                  return 0
           #return 1
           return HeuristicFunction(node) >  root_heur
             
@@ -471,7 +475,12 @@ class MCTSAgent(MultiAgentSearchAgent):
 ############################  MAIN FUNCTION  #######################################################
         if is_dangerous(dangerous_length) == 1:
           search(search_times,root)
-          return final_Selection(root)
+          final_move=final_Selection(root)
         else:
-          return find_food(root)
+          final_move=find_food(root)
+         
+        if final_move!=None:
+           return final_move
+        else:
+          return random.choice(root.gamestate.getLegalActions(0))
 ##################################################################################################
