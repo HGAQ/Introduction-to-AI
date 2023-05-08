@@ -109,11 +109,16 @@ class sigmoid(Node):
 
     def cal(self, X):
         # TODO: YOUR CODE HERE
-        raise NotImplementedError        
+        temp=1/(1+np.exp(-X + 1e-6))
+        self.cache.append(temp)
+        return temp
+            
 
     def backcal(self, grad):
+        return np.multiply(grad, np.multiply(self.cache[-1], 1-self.cache[-1]))
+        # dL/dx=L(1-L)
         # TODO: YOUR CODE HERE
-        raise NotImplementedError        
+                
     
 class tanh(Node):
     # shape x: (*)
@@ -148,11 +153,17 @@ class Linear(Node):
 
     def cal(self, X):
         # TODO: YOUR CODE HERE
-        raise NotImplementedError
+        self.cache.append(X)
+        return X @ self.params[0] + self.params[1]
 
     def backcal(self, grad):
         # TODO: YOUR CODE HERE
-        raise NotImplementedError
+        dldw =  self.cache[-1].T @ grad
+        dldb = np.sum(grad,axis=0)
+        dldx = grad @ self.params[0].T
+        self.grad.append(dldw)
+        self.grad.append(dldb)
+        return dldx
 
 
 class StdScaler(Node):
@@ -287,13 +298,18 @@ class LogSoftmax(Node):
 
     def cal(self, X):
         # TODO: YOUR CODE HERE
-        raise NotImplementedError
+        X = X - np.max(X, axis=self.dim, keepdims=True)
+        expX = np.exp(X)
+        ret = np.log(expX / expX.sum(axis=self.dim, keepdims=True) + 1e-6)
+        self.cache.append(ret)
+        return ret
 
     def backcal(self, grad):
         # TODO: YOUR CODE HERE
-        raise NotImplementedError
-
-
+        logsoftmaxX = self.cache[-1]
+        grad_p= grad.sum(axis=self.dim, keepdims=True) * np.exp(logsoftmaxX)
+        grad -= grad_p
+        return grad
 
 
 class NLLLoss(Node):
@@ -345,9 +361,16 @@ class CrossEntropyLoss(Node):
     def cal(self, X):
         # TODO: YOUR CODE HERE
         # 提示，可以对照NLLLoss的cal
-        raise NotImplementedError
+        y = self.y
+        self.cache.append(X)
+        return - np.sum(
+            np.take_along_axis(np.log(X + 1e-6), np.expand_dims(y, axis=-1), axis=-1))
+
 
     def backcal(self, grad):
         # TODO: YOUR CODE HERE
         # 提示，可以对照NLLLoss的backcal
-        raise NotImplementedError
+        X, y = self.cache[-1], self.y
+        ret = np.zeros_like(X)
+        np.put_along_axis(ret, np.expand_dims(y, axis=-1), -1, axis=-1)
+        return grad * ((X ** -1) * ret)

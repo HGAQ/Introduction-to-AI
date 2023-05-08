@@ -2,8 +2,8 @@ import numpy as np
 
 # 超参数
 # TODO: You can change the hyperparameters here
-lr = 1e-2  # 学习率
-wd = 1e-2  # l2正则化项系数
+lr = 1  # 学习率
+wd = 5e-4  # l2正则化项系数
 
 
 def predict(X, weight, bias):
@@ -15,9 +15,8 @@ def predict(X, weight, bias):
     @return: n wx+b
     """
     # TODO: YOUR CODE HERE
-    n, d = X.shape
     fx = bias + X @ weight
-    return fx
+    return fx # 1--n
     
 
 def sigmoid(x):
@@ -37,25 +36,16 @@ def step(X, weight, bias, Y):
         weight: d 更新后的weight参数
         bias: 1 更新后的bias参数
     """
-    print(1)
+    'n: 样本数量, d: 样本的维度'
     n, d = X.shape
-    print(1)
-    haty = np.zeros(n)
-    fx = predict(X, weight, bias)
-    sig = sigmoid(fx)
-    sigxy = sigmoid(fx * Y)
-    loss = (1 / n) * np.sum( - np.log(sigxy)) + wd * np.sum(np.square(weight))
-    index = 0
-    for sigi in sig:
-        if sigi > 0.5:
-            haty[index] = 1
-        else:
-            haty[index] = - 1
-        index += 1
-    w_tidu = - (1 / n) * np.sum((1 - sigxy)) * (Y @ X) + 2 * wd * weight
-    b_tidu = - (1 / n) * np.sum((1 - sigxy) * Y )
-    weight = weight - w_tidu
-    bias = bias - b_tidu
+    print(n,d)
+    haty = predict(X, weight, bias) # 1--n 
+    sigxy = sigmoid(haty * Y) # 1--n
+    loss = (1 / n) * np.sum( - np.log(sigxy + 1e-6)) + wd * np.sum(np.square(weight))
+    w_tidu = - (1 / n) * (((1 - sigxy) * Y ) @ X)  + 2 * wd * weight
+    b_tidu = - (1 / n) * np.sum((1 - sigxy)  * Y ) 
+    weight = weight - lr * w_tidu
+    bias = bias - lr * b_tidu
     return haty,loss,weight,bias
         
         

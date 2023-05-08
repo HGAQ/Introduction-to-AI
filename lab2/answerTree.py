@@ -6,7 +6,7 @@ EPS = 1e-6
 
 # 超参数，分别为树的最大深度、熵的阈值、信息增益函数
 # TODO: You can change or add the hyperparameters here
-hyperparams = {"depth":2, "purity_bound":1e-1, "gainfunc":"gain"}
+hyperparams = {"depth":1145, "purity_bound":0.01, "gainfunc":"gainratio"}
 
 def entropy(Y: np.ndarray):
     """
@@ -14,8 +14,14 @@ def entropy(Y: np.ndarray):
     @param Y: n, 标签向量
     @return: 熵
     """
-    # TODO: YOUR CODE HERE
-    raise NotImplementedError
+    n = Y.shape[0]
+    uniqued, ncnt = np.unique(Y, return_counts=True)
+    S=0
+    for cnt in ncnt:
+        S += (cnt / n) * (np.log(cnt / n) / np.log(2)) 
+    return -S
+
+
 
 
 def gain(X: np.ndarray, Y: np.ndarray, idx: int):
@@ -26,13 +32,19 @@ def gain(X: np.ndarray, Y: np.ndarray, idx: int):
     @param idx: 第idx个特征
     @return: 信息增益
     """
-    feat = X[:, idx]
-    ufeat, featcnt = np.unique(feat, return_counts=True)
-    featp = featcnt / feat.shape[0]
-    ret = 0
-    # TODO: YOUR CODE HERE
-    raise NotImplementedError
-    return ret
+    group = X[:, idx]
+    group_size = group.shape[0]
+    uniquedgroup, groupcnt = np.unique(group, return_counts=True)
+    H_group = entropy(Y)
+    H_element=0
+    for index in range(uniquedgroup.shape[0]):
+        Y_element=[]
+        for i in range(group_size):
+            if group[i] == uniquedgroup[index]:
+                Y_element.append(Y[i])
+        H_element += entropy(np.array(Y_element)) * groupcnt[index] / group_size
+    H = H_group-H_element
+    return H
 
 
 def gainratio(X: np.ndarray, Y: np.ndarray, idx: int):
@@ -94,25 +106,48 @@ class Node:
         return len(self.children) == 0
 
 
+def building(node: Node, X: np.ndarray, Y: np.ndarray, unused: List[int], depth: int, purity_bound: float, gainfunc: Callable, prefixstr="" ):
+    u, ucnt = np.unique(Y, return_counts=True)
+    node.label = u[np.argmax(ucnt)]
+    purity = ucnt[np.argmax(ucnt)] / Y.shape[0]
+    
+    if purity > 1 - purity_bound or depth > hyperparams["depth"] or Y.shape[0]<=1 or len(unused) == 0:
+        print(prefixstr, f"label {node.label} numbers {u} count {ucnt}")
+        print(purity,depth,Y.shape[0],len(unused))
+        return node
+    else:
+        gains = [gainfunc(X, Y, i) for i in unused]
+        idx = np.argmax(gains)
+        node.featidx = unused[idx]
+        print(prefixstr, f"label {node.label} numbers {u} count {ucnt} id{node.featidx}")
+        unused = deepcopy(unused)
+        unused.pop(idx)
+        feat = X[:, node.featidx]
+        ufeat = np.unique(feat)
+        for element in ufeat:
+            child=Node()
+            select=[]
+            for i in range(Y.shape[0]):
+                if feat[i] == element:
+                    select.append(i)
+            X_element=X[select,:]
+            Y_element=Y[select]
+            node.children[element]=child
+            building(child, X_element, Y_element, unused, depth+1, purity_bound, gainfunc, prefixstr="")
+
+
+
+
 def buildTree(X: np.ndarray, Y: np.ndarray, unused: List[int], depth: int, purity_bound: float, gainfunc: Callable, prefixstr=""):
     root = Node()
-    u, ucnt = np.unique(Y, return_counts=True)
-    root.label = u[np.argmax(ucnt)]
+    building(root, X, Y, unused, 0, purity_bound, gainfunc,prefixstr)
     # print(prefixstr, f"label {root.label} numbers {u} count {ucnt}") #可用于debug
     # 当达到终止条件时，返回叶节点
     # TODO: YOUR CODE HERE
-    raise NotImplementedError
-    gains = [gainfunc(X, Y, i) for i in unused]
-    idx = np.argmax(gains)
-    root.featidx = unused[idx]
-    unused = deepcopy(unused)
-    unused.pop(idx)
-    feat = X[:, root.featidx]
-    ufeat = np.unique(feat)
     # 按选择的属性划分样本集，递归构建决策树
     # 提示：可以使用prefixstr来打印决策树的结构
     # TODO: YOUR CODE HERE
-    raise NotImplementedError
+    
     return root
 
 

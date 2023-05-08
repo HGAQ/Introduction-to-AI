@@ -4,6 +4,7 @@ import modelTree as Tree
 import modelRandomForest as Forest
 import modelSoftmaxRegression as SR
 import modelMultiLayerPerceptron as MLP
+import YourTraining as MF
 import pickle
 
 class NullModel:
@@ -66,6 +67,22 @@ class MLPModel:
         pred = self.graph.forward(figure, removelossnode=True)[-1]
         return np.argmax(pred, axis=-1)
 
+
+class MyModel:
+    def __init__(self) -> None:
+        with open(MF.save_path, "rb") as f:
+            self.weightlist, self.biaslist, = pickle.load(f)
+
+    def __call__(self, figure):
+        num = 0
+        pos = -1
+        for is_num in range(10):
+            pred = figure @ self.weightlist[is_num] + self.biaslist[is_num]
+            if pred > pos :
+                num = is_num
+                pos = pred
+        return num
+
 modeldict = {
     "Null": NullModel,
     "LR": LRModel,
@@ -73,6 +90,6 @@ modeldict = {
     "Forest": ForestModel,
     "SR": SRModel,
     "MLP": MLPModel,
-    "Your": NullModel
+    "Your": MyModel
 }
 

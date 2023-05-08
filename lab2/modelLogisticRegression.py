@@ -23,7 +23,7 @@ if __name__ == "__main__":
     for i in range(1, 60+1):
         haty, loss, weight, bias = step(X, weight, bias, Y)
         acc = np.average((haty>0).flatten()==(Y>0))
-        #print(f"epoch {i} loss {loss:.3e} acc {acc:.4f}")
+        print(f"epoch {i} loss {loss:.3e} acc {acc:.4f}")
         if acc > best_train_acc:
             best_train_acc = acc
             with open(save_path, "wb") as f:

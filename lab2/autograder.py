@@ -1,7 +1,7 @@
 import argparse
 import subprocess
-from util import TimeoutFunction
 import numpy as np
+import time
 
 PYTHON_PATH = "python"
 
@@ -10,10 +10,10 @@ parser.add_argument("--q", choices=["q1", "q2", "q3", "q4", "all"], default="all
 parser.add_argument("--q4training", action="store_true")
 args = parser.parse_args()
 
+
 def programcall(cmd: str, timeout: float=600):
     print(cmd)
-    func = TimeoutFunction(subprocess.check_output, timeout)
-    ret = func(cmd, shell=True)
+    ret = subprocess.check_output(cmd, shell=True, timeout=timeout)
     ret = str(ret, encoding="utf-8")
     return ret.splitlines()
 

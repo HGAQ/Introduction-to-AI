@@ -48,7 +48,9 @@ class Graph(List):
         @return: 反传结束得到的梯度
         """
         # TODO: YOUR CODE HERE
-        raise NotImplementedError
+        for i in range(len(self)):
+            grad=self[len(self)-i-1].backward(grad,debug)
+        return grad
     
     def optimstep(self, lr, wd1, wd2):
         """
@@ -59,7 +61,9 @@ class Graph(List):
         @return: 不需要返回值
         """  
         # TODO: YOUR CODE HERE
-        raise NotImplementedError
+        for i in range(len(self)):
+            for j in range(len(self[i].params)):
+                self[i].params[j] -= lr * (self[i].grad[j] + 2 * wd2 * self[i].params[j])
 
     def parameters(self):
         """
