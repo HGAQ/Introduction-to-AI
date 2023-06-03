@@ -135,8 +135,11 @@ def q4():
 
 if __name__ == "__main__":
     if args.q == "all":
-        for q in [q1, q2, q3, q4]:
+        for q in [q1, q2, q3]:
             print(f"score {q():.0f}")
+        if args.q4training:
+            q4training()
+        print(f"score {q4():.0f}")
     else:
         if args.q == "q4" and args.q4training:
             q4training()

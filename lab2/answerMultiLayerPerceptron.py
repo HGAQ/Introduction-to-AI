@@ -19,6 +19,7 @@ def buildGraph(Y):
     @return: Graph类的实例, 建好的图
     """
     nodes = [StdScaler(mnist.mean_X, mnist.std_X),
+            
             Linear(mnist.num_feat, 490), 
             
             relu(),
@@ -39,7 +40,7 @@ def buildGraph(Y):
              
             Linear(196, 147),
             
-            relu(),
+            tanh(),
             
             Linear(147, 98),
             
